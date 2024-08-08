@@ -69,6 +69,12 @@ class ARP_OT_create_driver(bpy.types.Operator):
         rest1.targets[0].id = context.object
         rest1.targets[0].data_path = "arp_cbs_props.bone1rest"
         
+        if arp_cbs_props.invert:
+            expr1 = "(" + var.name + " - " + rest1.name + ") / (" + deform1.name + " - " + rest1.name + ")"
+        else:
+            expr1 = "(" + var.name + " - " + deform1.name + ") / (" + rest1.name + " - " + deform1.name + ")"
+        driver.driver.expression = expr1
+        
         if arp_cbs_props.use_two_bones:
             var2 = driver.driver.variables.new()
             var2.name = "dist2"
@@ -91,17 +97,10 @@ class ARP_OT_create_driver(bpy.types.Operator):
             rest2.targets[0].data_path = "arp_cbs_props.bone2rest"
 
             if arp_cbs_props.invert:
-                expr1 = "(" + var.name + " - " + rest1.name + ") / (" + deform1.name + " - " + rest1.name + ")"
+                expr2 = "(" + var2.name + " - " + rest2.name + ") / (" + deform2.name + " - " + rest2.name + ")"
             else:
-                expr1 = "(" + var.name + " - " + deform1.name + ") / (" + rest1.name + " - " + deform1.name + ")"
-            driver.driver.expression = expr1
-
-            if arp_cbs_props.use_two_bones:
-                if arp_cbs_props.invert:
-                    expr2 = "(" + var2.name + " - " + rest2.name + ") / (" + deform2.name + " - " + rest2.name + ")"
-                else:
-                    expr2 = "(" + var2.name + " - " + deform2.name + ") / (" + rest2.name + " - " + deform2.name + ")"
-                driver.driver.expression =  arp_cbs_props.combinationMethod + "(" + expr1 + ", " + expr2 + ")"
+                expr2 = "(" + var2.name + " - " + deform2.name + ") / (" + rest2.name + " - " + deform2.name + ")"
+            driver.driver.expression =  arp_cbs_props.combinationMethod + "(" + expr1 + ", " + expr2 + ")"
                 
 
         return {'FINISHED'}
