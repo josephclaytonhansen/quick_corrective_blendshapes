@@ -22,8 +22,7 @@ You'll now see the following:
 
 In this example, I'll be using a shapekey that corrects a skirt when either leg is raised. It's named "skirt_step", and I'd like it to be set to 1.0 when either leg is raised.
 
-1. Select the rig you want to use to drive the shapekey. This was designed for Auto Rig Pro, which names rigs "rig". 
-2. Rename your root bone to "root.x" if you're not using Auto Rig Pro. This is the bone that the add-on uses to measure distance from.
+1. Select the rig you want to use to drive the shapekey. 
 
 Since I'm using either leg as a driver, I will turn on "Use Two Bones".
 
