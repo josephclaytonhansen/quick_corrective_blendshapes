@@ -15,6 +15,8 @@ import bpy
 class ArpCbsProperties(bpy.types.PropertyGroup):
     show_properties: bpy.props.BoolProperty(default=False)
     use_two_bones: bpy.props.BoolProperty(name="Use Two Bones")
+    distance_or_rotation: bpy.props.EnumProperty(name="Root Relation", items=[("distance", "Distance", ""), ("rotation", "Rotation", "")])
+    root_name: bpy.props.StringProperty(name="Root Name", default="root.x")
     rig: bpy.props.PointerProperty(name="Rig", type=bpy.types.Object, poll=lambda self, obj: obj.type == 'ARMATURE')
     bone1: bpy.props.StringProperty(name="Bone 1")
     bone2: bpy.props.StringProperty(name="Bone 2")
@@ -50,12 +52,12 @@ class ARP_OT_create_driver(bpy.types.Operator):
 
         var = driver.driver.variables.new()
         var.name = "dist"
-        var.type = 'LOC_DIFF'
+        var.type = 'LOC_DIFF' if arp_cbs_props.distance_or_rotation.lower() == 'distance' else 'ROT_DIFF'
         var.targets[0].id = arp_cbs_props.rig
         var.targets[0].bone_target = arp_cbs_props.bone1
 
         var.targets[1].id = arp_cbs_props.rig
-        var.targets[1].bone_target = "root.x"
+        var.targets[1].bone_target = arp_cbs_props.root_name
         
         deform1 = driver.driver.variables.new()
         deform1.name = "deform1"
@@ -78,7 +80,7 @@ class ARP_OT_create_driver(bpy.types.Operator):
         if arp_cbs_props.use_two_bones:
             var2 = driver.driver.variables.new()
             var2.name = "dist2"
-            var2.type = 'LOC_DIFF'
+            var2.type = 'LOC_DIFF' if arp_cbs_props.distance_or_rotation.lower() == 'distance' else 'ROT_DIFF'
             var2.targets[0].id = arp_cbs_props.rig
             var2.targets[0].bone_target = arp_cbs_props.bone2
             var2.targets[1].id = arp_cbs_props.rig
@@ -100,7 +102,10 @@ class ARP_OT_create_driver(bpy.types.Operator):
                 expr2 = "(" + var2.name + " - " + rest2.name + ") / (" + deform2.name + " - " + rest2.name + ")"
             else:
                 expr2 = "(" + var2.name + " - " + deform2.name + ") / (" + rest2.name + " - " + deform2.name + ")"
-            driver.driver.expression =  arp_cbs_props.combinationMethod + "(" + expr1 + ", " + expr2 + ")"
+            if arp_cbs_props.combinationMethod == "average":
+                driver.driver.expression =  "(" + expr1 + " + " + expr2 + ") / 2"
+            else:
+                driver.driver.expression =  arp_cbs_props.combinationMethod + "(" + expr1 + ", " + expr2 + ")"
                 
 
         return {'FINISHED'}
@@ -113,6 +118,8 @@ def draw_func(self, context):
     if arp_cbs_props.show_properties:
         layout.prop(arp_cbs_props, "use_two_bones")
         layout.prop_search(arp_cbs_props, "rig", bpy.context.scene, "objects")
+        layout.prop(arp_cbs_props, "distance_or_rotation")
+        layout.prop(arp_cbs_props, "root_name")
         if arp_cbs_props.rig and arp_cbs_props.rig.type == 'ARMATURE':
             layout.prop(arp_cbs_props, "bone1")
             if arp_cbs_props.use_two_bones:
