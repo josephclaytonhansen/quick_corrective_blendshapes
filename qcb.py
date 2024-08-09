@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Quick Corrective Blendshapes",
     "author": "Joseph Hansen",
-    "version": (1, 0, 10),
+    "version": (1, 0, 8),
     "blender": (3, 6, 13),
     "location": "Object Data Properties > Shape Keys",
     "description": "Makes it simple to create corrective blendshapes",
@@ -11,14 +11,6 @@ bl_info = {
 }
 
 import bpy
-
-def find_shape_key_props(obj, shape_key_name):
-    for skp in obj.shape_key_props:
-        if skp.name == shape_key_name:
-            return skp.arp_cbs_props
-    skp = obj.shape_key_props.add()
-    skp.name = shape_key_name
-    return skp.arp_cbs_props
 
 class ArpCbsProperties(bpy.types.PropertyGroup):
     show_properties: bpy.props.BoolProperty(default=False)
@@ -34,10 +26,6 @@ class ArpCbsProperties(bpy.types.PropertyGroup):
     bone2deform: bpy.props.FloatProperty(name="Bone 2 Deform")
     invert: bpy.props.BoolProperty(name="Invert")
     combinationMethod: bpy.props.EnumProperty(name="Combination Method", items=[("max", "Max", ""), ("min", "Min", ""), ("average", "Average", "")])
-    
-class ShapeKeyProperties(bpy.types.PropertyGroup):
-    name: bpy.props.StringProperty(name="Shape Key Name")
-    arp_cbs_props: bpy.props.PointerProperty(type=ArpCbsProperties)
 
 class ARP_OT_corrective_blendshape(bpy.types.Operator):
     bl_idname = "arp.corrective_blendshape"
@@ -53,8 +41,8 @@ class ARP_OT_create_driver(bpy.types.Operator):
 
     def execute(self, context):
         obj = context.object
+        arp_cbs_props = obj.arp_cbs_props
         shape_key = obj.data.shape_keys.key_blocks[obj.active_shape_key_index]
-        arp_cbs_props = find_shape_key_props(obj, shape_key.name)
         driver = shape_key.driver_add("value")
         driver.driver.type = 'SCRIPTED'
         
@@ -124,9 +112,7 @@ class ARP_OT_create_driver(bpy.types.Operator):
 
 def draw_func(self, context):
     layout = self.layout
-    obj = context.object
-    shape_key = obj.data.shape_keys.key_blocks[obj.active_shape_key_index]
-    arp_cbs_props = find_shape_key_props(obj, shape_key.name)
+    arp_cbs_props = context.object.arp_cbs_props
 
     layout.operator(ARP_OT_corrective_blendshape.bl_idname)
     if arp_cbs_props.show_properties:
@@ -150,18 +136,15 @@ def draw_func(self, context):
 
 def register():
     bpy.utils.register_class(ArpCbsProperties)
-    bpy.utils.register_class(ShapeKeyProperties)
     bpy.utils.register_class(ARP_OT_corrective_blendshape)
     bpy.utils.register_class(ARP_OT_create_driver)
-    bpy.types.Object.shape_key_props = bpy.props.CollectionProperty(type=ShapeKeyProperties)
+    bpy.types.Object.arp_cbs_props = bpy.props.PointerProperty(type=ArpCbsProperties)
     bpy.types.DATA_PT_shape_keys.append(draw_func)
 
 def unregister():
     bpy.utils.unregister_class(ARP_OT_create_driver)
     bpy.utils.unregister_class(ARP_OT_corrective_blendshape)
-    bpy.utils.unregister_class(ShapeKeyProperties)
     bpy.utils.unregister_class(ArpCbsProperties)
-    del bpy.types.Object.shape_key_props
     bpy.types.DATA_PT_shape_keys.remove(draw_func)
 
 if __name__ == "__main__":
