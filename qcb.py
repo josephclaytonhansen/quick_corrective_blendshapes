@@ -1,7 +1,7 @@
 bl_info = {
     "name": "Quick Corrective Blendshapes",
     "author": "Joseph Hansen",
-    "version": (1, 0, 9),
+    "version": (1, 0, 10),
     "blender": (3, 6, 13),
     "location": "Object Data Properties > Shape Keys",
     "description": "Makes it simple to create corrective blendshapes",
@@ -150,6 +150,7 @@ def draw_func(self, context):
 
 def register():
     bpy.utils.register_class(ArpCbsProperties)
+    bpy.utils.register_class(ShapeKeyProperties)
     bpy.utils.register_class(ARP_OT_corrective_blendshape)
     bpy.utils.register_class(ARP_OT_create_driver)
     bpy.types.Object.shape_key_props = bpy.props.CollectionProperty(type=ShapeKeyProperties)
@@ -158,6 +159,7 @@ def register():
 def unregister():
     bpy.utils.unregister_class(ARP_OT_create_driver)
     bpy.utils.unregister_class(ARP_OT_corrective_blendshape)
+    bpy.utils.unregister_class(ShapeKeyProperties)
     bpy.utils.unregister_class(ArpCbsProperties)
     del bpy.types.Object.shape_key_props
     bpy.types.DATA_PT_shape_keys.remove(draw_func)
