@@ -15,8 +15,8 @@ import bpy
 class ArpCbsProperties(bpy.types.PropertyGroup):
     show_properties: bpy.props.BoolProperty(default=False)
     use_two_bones: bpy.props.BoolProperty(name="Use Two Bones")
-    distance_or_rotation: bpy.props.EnumProperty(name="Root Relation", items=[("distance", "Distance", ""), ("rotation", "Rotation", "")])
-    root_name: bpy.props.StringProperty(name="Root Name", default="root.x")
+    distance_or_rotation: bpy.props.EnumProperty(name="Comparison Relation", items=[("distance", "Distance", ""), ("rotation", "Rotation", "")])
+    root_name: bpy.props.StringProperty(name="Comparison Bone", default="root.x")
     rig: bpy.props.PointerProperty(name="Rig", type=bpy.types.Object, poll=lambda self, obj: obj.type == 'ARMATURE')
     bone1: bpy.props.StringProperty(name="Bone 1")
     bone2: bpy.props.StringProperty(name="Bone 2")
@@ -52,7 +52,7 @@ class ARP_OT_create_driver(bpy.types.Operator):
 
         var = driver.driver.variables.new()
         var.name = "dist"
-        var.type = 'LOC_DIFF' if arp_cbs_props.distance_or_rotation.lower() == 'distance' else 'ROT_DIFF'
+        var.type = 'LOC_DIFF' if arp_cbs_props.distance_or_rotation.lower() == 'distance' else 'ROTATION_DIFF'
         var.targets[0].id = arp_cbs_props.rig
         var.targets[0].bone_target = arp_cbs_props.bone1
 
@@ -80,7 +80,7 @@ class ARP_OT_create_driver(bpy.types.Operator):
         if arp_cbs_props.use_two_bones:
             var2 = driver.driver.variables.new()
             var2.name = "dist2"
-            var2.type = 'LOC_DIFF' if arp_cbs_props.distance_or_rotation.lower() == 'distance' else 'ROT_DIFF'
+            var2.type = 'LOC_DIFF' if arp_cbs_props.distance_or_rotation.lower() == 'distance' else 'ROTATION_DIFF'
             var2.targets[0].id = arp_cbs_props.rig
             var2.targets[0].bone_target = arp_cbs_props.bone2
             var2.targets[1].id = arp_cbs_props.rig
